@@ -357,7 +357,7 @@ def run_pipeline(db_url: str, pages: int = 1, per_page: int = 250):
 def parse_args():
     parser = argparse.ArgumentParser(description="Crypto market data ETL pipeline.")
     parser.add_argument(
-        "--db", default=os.environ.get("DATABASE_URL", DEFAULT_DB_URL),
+        "--db", default=os.environ.get("DATABASE_URL") or DEFAULT_DB_URL,
         help="SQLAlchemy database URL (defaults to DATABASE_URL env var, then local SQLite).",
     )
     parser.add_argument("--pages", type=int, default=1, help="Number of API pages to fetch (250 coins/page).")

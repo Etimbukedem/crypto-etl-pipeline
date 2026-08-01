@@ -1,0 +1,4 @@
+requests
+pandas>=2.3.0
+SQLAlchemy>=2.0.36
+psycopg2-binary

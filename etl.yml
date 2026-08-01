@@ -1,0 +1,48 @@
+name: Daily Crypto ETL Pipeline
+
+on:
+  schedule:
+    # Runs at 03:00 UTC every day. Adjust to your timezone preference.
+    - cron: "0 3 * * *"
+  workflow_dispatch: {}   # lets you trigger it manually from the Actions tab
+  push:
+    branches: [main]
+    paths:
+      - "etl.py"
+      - "schema.sql"
+      - ".github/workflows/etl.yml"
+
+jobs:
+  run-etl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run ETL pipeline
+        env:
+          # Set this repo secret to a PostgreSQL URL (e.g. from Supabase,
+          # Railway, or Neon) to persist data across runs. If unset, the
+          # pipeline falls back to a local SQLite file that only lives for
+          # the duration of this job — fine for testing, not for real use.
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python etl.py
+
+      - name: Upload logs as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: etl-logs-${{ github.run_id }}
+          path: logs/etl.log
+          retention-days: 14
